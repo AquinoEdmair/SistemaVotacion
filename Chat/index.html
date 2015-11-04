@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Votacion</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="/css/main.css" rel="stylesheet">
+
+    <link href="/css/bootstrap-notify.css" rel="stylesheet">
+
+    <script src="/js/jquery.js"></script>
+
+  </head>
+  <body>
+
+  <br>
+  <br>
+
+
+  <div class="container" id="contenido-registro">      
+       <div class="card card-container">
+            <img id="profile-img" class="profile-img-card" src="/img/uv.png" />
+            <p id="profile-name" class="profile-name-card"></p>
+            <div id="formulario-registro" style="margin-bottom: 60px;">
+              <div id="alerta-registro">
+              </div>
+              <div class="form-group">
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="nombreRegistro" placeholder="Introducir nombre" required>
+                    <span class="input-group-addon danger"></span>
+                  </div>
+              </div>
+
+              <div class="form-group">
+                  <div class="input-group" data-validate="email">
+                    <input type="text" class="form-control" name="validate-email" id="emailRegistro" placeholder="Introducir email" required>
+                    <span class="input-group-addon danger"><span class="glyphicon glyphicon-remove"></span></span>
+                  </div>
+              </div>
+
+              <div class="form-group">
+                  <div class="input-group">
+                    <input type="password" class="form-control" id="passwordRegistro" placeholder="Introducir contraseña" required>
+                    <span class="input-group-addon danger"></span>
+                  </div>
+              </div>
+    
+              <button style="margin-bottom:10px;" type="submit" class="btn btn-primary col-xs-12" disabled id="envia-registro">Registrarse</button>
+
+              <div class="text-center linkRegistro">
+                  <a href="#">Ya tienes una cuenta? Inicia Sesión </a>
+              </div>
+
+            </div>
+        </div>
+  </div>
+
+  <div class="container" id="contenido-login">      
+       <div class="card card-container">
+            <img id="profile-img" class="profile-img-card" src="/img/uv.png" />
+            <p id="profile-name" class="profile-name-card"></p>
+            <div id="formulario-login" style="margin-bottom: 60px;">
+              <div id="alerta">
+              </div>
+              <div class="form-group">
+                  <div class="input-group" data-validate="email">
+                    <input type="text" class="form-control" name="validate-email" id="email" placeholder="Introducir email" required>
+                    <span class="input-group-addon danger"><span class="glyphicon glyphicon-remove"></span></span>
+                  </div>
+              </div>
+
+              <div class="form-group">
+                  <div class="input-group">
+                    <input type="password" class="form-control" id="password" placeholder="Introducir contraseña" required>
+                    <span class="input-group-addon danger"></span>
+                  </div>
+              </div>
+              
+              <button style="margin-bottom:10px;" type="submit" class="btn btn-primary col-xs-12" disabled id="envia-email">Entrar</button>
+
+              <div class="text-center linkLogin">
+                  <a href="#">No tienes una cuenta? Registrate </a>
+              </div>
+            </div>
+        </div>
+  </div>
+  <div class="container" id="contenido-chat">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-comment"></span>  
+                     Chat de Votación
+                </div>
+                <div class="panel-body">
+                    <ul class="chat" id="chat">
+                    </ul>
+                </div>
+                <div class="panel-footer">
+                      <form id="envia-mensaje" class="input-group">
+                        <input id="mensaje" type="text" class="form-control input-sm" placeholder="Escribir mensaje..." />
+                        <span class="input-group-btn">
+                            <button class="btn btn-warning btn-sm" type="submit">
+                                Enviar</button>
+                        </span>
+                      </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-list"></span>  
+                     Resultados
+                </div>
+                <div class="panel-body">
+                    <div class="preguntas" id="preguntas">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-user"></span>  
+                     Usuarios conectados
+                </div>
+                <div id="usuarios" class="panel-body"></div>
+            </div>
+        </div>
+    </div>
+
+      <div class='notifications bottom-right'></div>
+
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    jQuery(function($) {
+
+      $("body").css("background-color","#003D78");
+
+      var socket = io();
+      var $mensajeForm = $('#envia-mensaje');
+      var $mensajeBox = $('#mensaje');
+
+      var $chat = $('#chat');
+
+      var $preguntas = $('#preguntas');
+
+      var $emailForm = $('#envia-email');
+      var $emailBox = $('#email');
+      var $passBox = $('#password');
+
+      var $registroForm = $('#envia-registro');
+      var $nombreRegistroBox = $('#nombreRegistro');
+      var $emailRegistroBox = $('#emailRegistro');
+      var $passRegistroBox = $('#passwordRegistro');
+
+      var $usuarios = $('#usuarios');
+
+
+      $registroForm.click(function(e) {
+
+        e.preventDefault();
+        socket.emit('agrega usuario', {nombre: $nombreRegistroBox.val(), usuario: $emailRegistroBox.val(), pass: $passRegistroBox.val()}, function(data) {
+          if(data) {
+            $('#alerta-registro').append('<div id="correcto-alert" class="alert alert-success" role="alert">Datos guardados correctamente!</div>');
+
+              $("#correcto-alert").fadeTo(2000, 500).slideUp(500, function(){
+                  $("#correcto-alert").alert('close');
+                  $('#contenido-registro').hide();
+                  $('#contenido-login').show();
+              }); 
+            $emailRegistroBox.val('');
+            $passRegistroBox.val('');
+            $nombreRegistroBox.val('');
+          } else {
+              $('#alerta-registro').append('<div id="incorrecto-alert" class="alert alert-danger" role="alert">Datos incorrectos!</div>');
+
+              $("#incorrecto-alert").fadeTo(2000, 500).slideUp(500, function(){
+                    $("#incorrecto-alert").alert('close');
+                });  
+          }
+        });
+      });
+
+      $emailForm.click(function(e) {
+
+        e.preventDefault();
+        socket.emit('nuevo usuario', {usuario: $emailBox.val(), pass: $passBox.val()}, function(data) {
+          if(data) {
+            $("body").css("background-color","white");
+            $('#contenido-login').hide();
+            $('#contenido-chat').show();
+            $emailBox.val('');
+            $passBox.val('');
+          } else {
+              $('#alerta').append('<div id="incorrecto-alert" class="alert alert-danger" role="alert">Datos incorrectos!</div>');
+
+              $("#incorrecto-alert").fadeTo(2000, 500).slideUp(500, function(){
+                    $("#incorrecto-alert").alert('close');
+                });  
+          }
+        });
+      });
+
+      $mensajeForm.submit(function(e) {
+        e.preventDefault();
+        if($mensajeBox.val()!='') socket.emit('envia mensaje', $mensajeBox.val());
+          $chat.append('<li class="left clearfix"><div class="chat-body clearfix"><div class="header"><small class=" text-muted"> </small><strong class="pull-left primary-font">Yo</strong></div><p>'+ $mensajeBox.val() +'</p></div></li>');
+          $mensajeBox.val('');
+      });
+
+      socket.on('mensaje nuevo', function(data) {
+        $chat.append('<li class="right clearfix"><div class="chat-body clearfix"><div class="header"><small class=" text-muted"> </small><strong class="pull-right primary-font">'+data.usuario+'</strong></div><p style="text-align: right;">'+data.msg+'</p></div></li>');
+        $chat.animate({scrollTop: $chat.prop("scrollHeight")}, 500);
+      });
+
+      socket.on('nueva pregunta', function(data) {
+
+        $chat.append('<form name="'+data.idPregunta+'" ><li class="left clearfix"><div class="chat-body clearfix"><div class="header"><small class=" text-muted"></small><strong class="pull-left primary-font">'+data.pregunta+'</strong><div class="col-md-12" id="'+data.idPregunta+'" style="margin-top:10px;"></div><div class="col-md-12" style="margin-top:10px; margin-bottom:10px;"><span class="input-group-btn"><input class="btn btn-success btn-sm" type="button" value="Enviar" id="test" onClick="$(this).enviaRespuesta('+"'"+data.idPregunta+"'"+');"/></span></div></div></div></li></form>');
+
+        for(var i=0;i<data.respuestas.length;i++){
+            var res = data.respuestas[i];
+            if(i==0){
+              $('#'+data.idPregunta).append('<label class="radio-inline"><input type="radio" name="'+data.idPregunta+'" value="'+res["_id"]+'" checked>'+res["respuesta"]+'</label>');
+            }else{
+               $('#'+data.idPregunta).append('<label class="radio-inline"><input type="radio" name="'+data.idPregunta+'" value="'+res["_id"]+'">'+res["respuesta"]+'</label>');
+            }
+           
+        }
+
+      });
+
+      socket.on('usuario conectado', function(data) {
+        $('.bottom-right').notify({
+          message: { text: data.usuario + ' se ha conectado' },
+           type: 'success'
+        }).show(); 
+      });
+
+      socket.on('usuario desconectado', function(data) {
+        $('.bottom-right').notify({
+          message: { text: data.usuario + ' se ha desconectado' },
+           type: 'danger'
+        }).show(); 
+      });
+
+      socket.on('usuarios', function(data) {
+          var html = '';
+          for (var usuario in data) {
+              html += '<span class="glyphicon glyphicon-user" style="color: green; margin-right: 10px;"></span><strong>' + usuario + '</strong><br/>';
+          }
+          $usuarios.html(html);
+      });
+
+      socket.on('preguntas', function(data) {
+        var html = '';
+        var i = 0;
+        $.each($.parseJSON(data), function(key,value){
+          i++;
+          html += '<strong>'+i+'.- '+value.pregunta +'</strong><br/><br/>';
+          html += '<ul class="list-group">'
+          for(var j=0;j<value.respuestas_id.length;j++){
+            var res = value.respuestas_id[j];
+            html += '<li class="list-group-item"><span class="badge">'+res.total+'</span>'+res.respuesta+'</li>';
+          }
+          html += '</ul>';
+        });
+        $preguntas.html(html);
+      });
+
+
+      $.fn.enviaRespuesta = function(id){
+        var $form = $('form[name="'+id+'"]');
+        var $res = $("input[name='"+id+"']:checked").val();
+
+        socket.emit('guarda respuesta', {idRespuesta: $res, idPregunta: id}, function(data) {
+          if(data){
+            $form.remove();
+          }else{
+            //no se hizo correctamente
+          }
+        });
+      }; 
+
+      $('.linkLogin a').click(function(evt) {
+          evt.preventDefault();
+          $('#contenido-login').hide();
+          $('#contenido-registro').show();
+      });
+
+      $('.linkRegistro a').click(function(evt) {
+          evt.preventDefault();
+          $('#contenido-registro').hide();
+          $('#contenido-login').show();
+      });
+
+    });  
+  </script>
+
+  <!-- Bootstrap JavaScript -->
+  <script src="/js/bootstrap.min.js"></script>
+
+  <script src="/js/bootstrap-notify.js"></script>
+
+  <script src="/js/main.js"></script>
+  </body>
+</html>

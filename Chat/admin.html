@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Votacion</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="/css/main.css" rel="stylesheet">
+
+    <link href="/css/bootstrap-notify.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery.js"></script>
+
+  </head>
+  <body>
+
+  <br>
+  <br>
+
+  <div class="container" id="contenido-login">      
+      <div class="row">
+          <div class="col-sm-offset-4 col-sm-4 text-center" id="formulario-login">
+                <h3>Agregar Pregunta</h3>
+                <br>
+                <div id="alerta">
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="pregunta" placeholder="Introducir pregunta" required />
+                      <span class="input-group-addon danger"></span>
+                    </div>
+                </div>
+
+                <h4>Respuestas</h4>
+                <div class="form-group">
+                  <div class="controls"> 
+                    <form role="form" autocomplete="off" onkeypress="return event.keyCode != 13;">
+                      <div class="entry input-group">
+                        <input class="form-control" name="respuestas[]" type="text" placeholder="Agregar respuesta" required />
+                                <span class="input-group-btn">
+                                      <button class="btn btn-success btn-add" type="button">
+                                          <span class="glyphicon glyphicon-plus"></span>
+                                      </button>
+                                  </span>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                <br>
+  
+                  <button type="submit" class="btn btn-primary col-xs-12" disabled id="envia-pregunta">Agregar</button>
+          </div>
+      </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    jQuery(function($) {
+      
+      var socket = io();
+
+      var $preguntaForm = $('#envia-pregunta');
+      var $preguntaBox = $('#pregunta');
+
+      $preguntaForm.click(function(e) {
+        e.preventDefault();
+        var respuestas = [];
+        $('input[name^="respuestas"]').each(function() {
+          if($(this).val().length>0)
+          respuestas.push($(this).val());
+        });
+
+        if(respuestas.length==0 || respuestas.length==1){
+          $('#alerta').append('<div id="incorrecto-alert" class="alert alert-danger" role="alert">Se necesita mínimo una respuesta!</div>');
+              $("#incorrecto-alert").fadeTo(2000, 500).slideUp(500, function(){
+                      $("#incorrecto-alert").alert('close');
+                });
+        }else{
+          socket.emit('guarda pregunta', {pregunta: $preguntaBox.val(), respuestas: respuestas}, function(data) {
+            if(data) {
+              $('input[name^="respuestas"]').each(function() {
+                if($(this).val().length>0){
+                  var controlForm = $('.controls form:first');
+                  controlForm.find('.agregado:first').remove();
+                }
+              });
+
+              var controlForm = $('.controls form:first');
+              controlForm.find('input').val('');
+
+              $preguntaBox.val('');
+              $('#alerta').append('<div id="correcto-alert" class="alert alert-success" role="alert">Se ha guardado correctamente!</div>');
+              $("#correcto-alert").fadeTo(2000, 500).slideUp(500, function(){
+                      $("#correcto-alert").alert('close');
+                  });
+            } else { 
+              $('#alerta').append('<div id="incorrecto-alert" class="alert alert-danger" role="alert">Ha ocurrido un error!</div>');
+              $("#incorrecto-alert").fadeTo(2000, 500).slideUp(500, function(){
+                      $("#incorrecto-alert").alert('close');
+                });
+            }
+          });
+        }
+      });
+
+    });
+
+  </script>
+  
+  <!-- Bootstrap JavaScript -->
+  <script src="/js/bootstrap.min.js"></script>
+
+  <script src="/js/bootstrap-notify.js"></script>
+
+  <script src="/js/main.js"></script>
+  </body>
+</html>

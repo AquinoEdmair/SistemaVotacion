@@ -1,0 +1,14 @@
+{
+  "name": "nodechat",
+  "version": "0.0.1",
+  "description": "Chat ejemplo con node + socket.io",
+  "main": "app.js",
+  "repository": "",
+  "author": "Edmair Antonio Aquino",
+  "dependencies": {
+    "express": "latest",
+    "socket.io": "latest",
+    "body-parser": "~1.14.1",
+    "mongoose": "~4.2.3"
+  }
+}
